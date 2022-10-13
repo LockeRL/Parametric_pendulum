@@ -7,6 +7,7 @@ class Application {
         this.frequencyField = document.getElementById("frequency");
         this.amplitudeField = document.getElementById("amplitude");
         this.lengthField = document.getElementById("length");
+        this.frictionField = document.getElementById("friction");
 
         this.button = document.getElementById("mainButton");
 
@@ -28,12 +29,11 @@ class Application {
                 const data = this.getData();
 
                 // Создаём новый маятник
-                this.pendulum = new Pendulum(400, 400, 15, data.angle, data.length, data.frequency, data.amplitude);
+                this.pendulum = new Pendulum(400, 400, 15, data.angle, data.length, data.friction, data.frequency, data.amplitude);
 
                 this.timer = setInterval(() => this.redraw(), this.interval);
                 this.button.value = "Остановить";
             }
-
             
             this.run = !this.run;
         });
@@ -65,13 +65,15 @@ class Application {
         const length = parseFloat(this.lengthField.value);
         const frequency = parseFloat(this.frequencyField.value);
         const amplitude = parseFloat(this.amplitudeField.value);
+        const friction = parseFloat(this.frictionField.value);
 
-        if (isFinite(angle) && isFinite(length) && isFinite(amplitude) && isFinite(frequency))
+        if (isFinite(angle) && isFinite(length) && isFinite(amplitude) && isFinite(frequency) && isFinite(friction))
             return {
                 angle: angle,
                 length: length,
                 frequency: frequency,
-                amplitude: amplitude
+                amplitude: amplitude,
+                friction: friction
             };
         else
             return null;
@@ -109,6 +111,11 @@ class Application {
                 return false;
             }
 
+            if (data.friction < 0 || data.friction > 1) {
+                alert("Коэффициент затухания быть от 0 до 1!");
+                return false;
+            }
+
             return true;
         }
     }
@@ -118,6 +125,7 @@ class Application {
         this.lengthField.disabled = false;
         this.frequencyField.disabled = false;
         this.amplitudeField.disabled = false;
+        this.frictionField.disabled = false;
     }
 
     disableInputFields() {
@@ -125,24 +133,30 @@ class Application {
         this.lengthField.disabled = true;
         this.frequencyField.disabled = true;
         this.amplitudeField.disabled = true;
+        this.frictionField.disabled = true;
     }
 }
 
 class Pendulum {
     /**
      * Создаёт маятник
-     * @param x0 Координата точки крепления маятника по оси X
-     * @param y0 Координата точки крепления маятника по оси Y
-     * @param raduis Радиус груза (так как он имеет форму шара)
-     * @param angle Угол начального отклонения маятника (в градусах)
-     * @param length Длина подвеса
-     * @param frequency Коэффицент затухания
-     * @param amplitude Амплитуда колебаний подвеса
+     * @param x0 координата х точки крепления опоры и стержня
+     * @param y0 координата y точки крепления опоры и стержня
+     * @param raduis радиус шара
+     * @param angle угол начального отклонения маятника
+     * @param length длина стержня
+     * @param friction коэффицент затухания
+     * @param frequency частота колебаний подвеса
+     * @param amplitude амплитуда колебаний подвеса
      */
-    constructor(x0, y0, raduis, angle, length, frequency, amplitude) {
+    constructor(x0, y0, raduis, angle, length, friction, frequency, amplitude) {
         const mult = 200; // Коэффециент масштабирования длины нити
         length *= mult;
         amplitude *= mult;
+
+        // Начальные координаты
+        this.x0 = x0;
+        this.y0 = y0;
 
         // Текущие координаты шара
         this.ballX = x0 + length * Math.sin(angle);
@@ -160,7 +174,7 @@ class Pendulum {
         this.freq = frequency;
         this.amp = amplitude;
         this.g = 9.80665;
-        this.gamma = 0.1; // трение
+        this.friction = friction;
 
         // Переменные для leap_frog
         this.a = [0, 0];
@@ -169,32 +183,32 @@ class Pendulum {
         this.i = 0;
         this.t = 0;
         this.dt = 0.1;
-        console.log("ball", this.ballX, this.ballY, this.len);
-        console.log("sus", this.susX, this.susY);
+        //console.log("ball", this.ballX, this.ballY, this.len);
+        //console.log("sus", this.susX, this.susY, this.amp);
     }
 
-    calculateCoordinates() { // Решаем с помощью метода leapfrog уравннеие для угла отклонения маятника
+    calculateCoordinates() { // Решаем с помощью метода leapfrog уравнение для угла отклонения маятника
         var i = this.i;
-        this.a[i % 2] = (-1) * 2 * this.gamma * this.v[i % 2] + (this.g / this.len - 
+        this.a[i % 2] = (-1) * 2 * this.friction * this.v[i % 2] + (this.g / this.len - 
         (this.amp / this.len) * this.freq * this.freq * Math.cos(this.freq * this.t)) * Math.sin(this.phi[i % 2]);
 
         this.phi[(i + 1) % 2] = this.phi[i % 2] + this.v[i % 2] * this.dt + (1 / 2) * 
             this.a[i % 2] * this.dt * this.dt;
 
-        this.a[(i + 1) % 2] = (-1) * 2 * this.gamma * this.v[i % 2] + (this.g / this.len - (this.amp / this.len) *
+        this.a[(i + 1) % 2] = (-1) * 2 * this.friction * this.v[i % 2] + (this.g / this.len - (this.amp / this.len) *
             this.freq * this.freq * Math.cos(this.freq * this.t)) * Math.sin(this.phi[(i + 1) % 2]);
 
         this.v[(i + 1) % 2] = this.v[i % 2] + (1 / 2) * (this.a[i % 2] + this.a[(i + 1) % 2]) * this.dt;
 
-        this.susY += this.amp * Math.cos(this.freq * this.t);
+        this.susY = this.y0 + this.amp * Math.cos(this.freq * this.t);
 
         this.ballX = this.susX + this.len * Math.sin(this.phi[(i + 1) % 2]);
         this.ballY = this.susY + this.len * Math.cos(this.phi[i % 2]);
 
         this.t += this.dt;
         this.i++;
-        console.log("ball", this.ballX, this.ballY, this.i);
-        console.log("sus", this.susX, this.susY, this.len);
+        //console.log("ball", this.ballX, this.ballY, this.i);
+        //console.log("sus", this.susX, this.susY, this.len);
     }
 
     /**
