@@ -141,7 +141,7 @@ class Application {
                 return false;
             }
 
-            if (data.speed <= 0 || data.speed > 5) {
+            if (data.speed <= 0 || data.speed > 3) {
                 alert("Скорость должна быть больше 0 и не больше 3!");
                 return false;
             }
@@ -237,7 +237,7 @@ class Pendulum {
         var ballY = this.susY + this.len * Math.cos(this.phi[i % 2]);
 
         this.t += this.dt;
-        this.i++;
+        this.i = (i + 1) % 2;
         return {
             ballX: ballX,
             ballY: ballY,
