@@ -2,7 +2,7 @@ class Application {
     constructor() {
         this.canvas = document.getElementById("canvas");
         this.context = this.canvas.getContext("2d");
-        const canvSize = Math.min(window.innerHeight * 0.8, window.innerWidth * 0.8);
+        const canvSize = Math.min(window.innerHeight, window.innerWidth) * 0.8;
         this.canvas.width = canvSize;
         this.canvas.height = canvSize;
 
