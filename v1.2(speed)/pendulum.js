@@ -142,7 +142,7 @@ class Application {
             }
 
             if (data.speed <= 0 || data.speed > 5) {
-                alert("Скорость должна быть больше 0 и не больше 5!");
+                alert("Скорость должна быть больше 0 и не больше 3!");
                 return false;
             }
 
@@ -307,7 +307,7 @@ class Pendulum {
      */
     drawPendulum(context, canvX, canvY, interval) {
         const cord = this.getNewCoordinates();
-        const k = interval / 5;
+        const k = interval / 10;
         const ballXStep = (cord.ballX - this.ballX) / k;
         const ballYStep = (cord.ballY - this.ballY) / k;
         const susYStep = (cord.susY - this.susY) / k;
