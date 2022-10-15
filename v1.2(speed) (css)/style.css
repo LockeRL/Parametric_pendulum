@@ -88,6 +88,11 @@ input {
     font-size: large;
 }
 
+#mainButton {
+    font-family: 'Gilroy';
+    font-size: small;
+}
+
 #info {
     font-family: 'Gilroy';
     font-size: x-large;
