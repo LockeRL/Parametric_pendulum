@@ -70,7 +70,7 @@ img {
 
 #mainButton {
     font-size: larger;
-    width: 30%;
+    width: 40%;
 }
 
 .footer {
@@ -79,8 +79,9 @@ img {
     margin-right: 10px;
     height: 5%;
     position: absolute;
-    top: 95%;
-    right: 0;
+    top: 97%;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 input {
