@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Маятник</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="pendulum.js"></script>
+        <script src="slider.js"></script>
+    </head>
+    <body>
+        <div class="header">
+            <img src="images/Gerb.png">
+            <p id="name">МГТУ им. Н.Э. Баумана</p>
+            <h1 id="h1">Симуляция движения маятника Капицы</h1>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div class="info">
+            <p class="params">
+                <label for="freq_slider">Угловая частота: </label>
+                <output for="freq_slider" id="frequency">0</output>
+                <input class="slider" type="range" id="freq_slider" min="0" max="10" value="0" step="0.1" oninput="outputUpdate(value, 'frequency')"> <i>рад/с</i>
+            </p>
+
+            <p class="params">
+                <label for="amplitude">Амплитуда: </label>
+                <input type="text" id="amplitude" size="3"> <i>м</i>
+            </p>
+
+            <p class="params">
+                <label for="length">Длина подвеса: </label>
+                <input type="text" id="length" size="3"> <i>м</i>
+            </p>
+
+            <p class="params">
+                <label for="angle">Начальное отклонение: </label>
+                <input type="text" id="angle" size="4"> &deg;
+            </p>
+
+            <p class="params">
+                <label for="friction">Коэффициент затухания: </label>
+                <input type="text" id="friction" size="4">
+            </p>
+
+            <p class="params">
+                <label for="speed">Выберите скорость отрисовки:</label>
+                <select id="speed">
+                    <option value="">--Выберите скорость--</option>
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                </select>
+            </p>
+
+            <p class="btn">
+                <input type="button" value="Запустить" id="mainButton">
+            </p>
+        </div>
+        <p class="footer">© 2022 Сидоров Максим, Юрченко Михаил, Семенчук Михаил</p>
+    </body>
+</html>
