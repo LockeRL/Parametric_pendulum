@@ -28,7 +28,10 @@ class Application {
             if (this.run)
                 this.pause();
             else if (this.pendulum !== undefined || this.createPendulum())
+            {
                 this.unpause();
+                this.restartButton.value = "Перезапустить";
+            }
         });
 
         this.restartButton.addEventListener('click', () => {
@@ -36,6 +39,7 @@ class Application {
             {
                 this.cleanCanvas(this.graphCanvas);
                 this.unpause(); // ?
+                this.restartButton.value = "Перезапустить";
             }
         });
     }
@@ -77,9 +81,12 @@ class Application {
      * Перерисовывает весь холст заново
      */
     redraw() {
-        this.cleanCanvas(this.pendulumCanvas);
         this.pendulum.update();
+
+        this.cleanCanvas(this.pendulumCanvas);
         this.pendulum.drawPendulum(this.pendulumContext, this.pendulumCanvas.width, this.pendulumCanvas.height);
+
+        this.cleanCanvas(this.graphCanvas);
         this.pendulum.drawGraph(this.graphContext, this.graphCanvas.width, this.graphCanvas.height);
     }
 
@@ -220,6 +227,9 @@ class Pendulum {
 
         this.ang_vel = ang_vel;
         
+        // Координаты для отрисковки графика
+        this.coordinates = [];
+
         this.g = 9.80665;
         this.friction = friction;
 
@@ -372,8 +382,16 @@ class Pendulum {
         context.lineTo(width, height);
         context.stroke();
         context.closePath();
+        
 
-        context.fillRect(this.t, height - this.calculateTotalEnergy() / 50, 1, 1);
+        // let k = 10;
+        // let x = this.t * k;
+        let y = height - this.calculateTotalEnergy() / 50;
+        this.coordinates.push(y);
+        if (this.coordinates.length > width)
+            this.coordinates.shift();
+        for (let i = 0; i < this.coordinates.length; i++)
+            context.fillRect(i, this.coordinates[i], 1, 1);
         context.fill();
     }
 }
