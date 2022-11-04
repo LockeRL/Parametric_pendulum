@@ -203,7 +203,7 @@ class Pendulum
      */
     constructor(x0, y0, radius, data)
     {
-        // Начальные координаты
+        // Начальное состояние системы
         this.x0 = x0;
         this.y0 = y0;
 
@@ -218,26 +218,21 @@ class Pendulum
         // Радиус шара
         this.r = radius;
 
-        // Масса шарика
-        this.weight = data.weight;
-
         // Параметры системы
 
         // Истинные значения
+        this.weight = data.weight;
         this.length = data.length;
         this.amplitude = data.amplitude;
+        this.friction = data.friction;
+        this.ang_vel = data.ang_vel;
 
         // Отрисовка
         this.len = data.length * data.mult;
-        this.amp = data.amplitude * data.mult;
+        this.amp = data.amplitude * data.mult;        
 
-        this.ang_vel = data.ang_vel;
-        
         // Координаты для отрисковки графика
         this.coordinates = [];
-
-        this.g = 9.80665;
-        this.friction = data.friction;
 
         // Переменные для leapfrog
         this.a = [0, 0];
@@ -246,6 +241,14 @@ class Pendulum
         this.i = 0;
         this.t = 0;
         this.dt = 0.1;
+    }
+
+    /**
+     * Ускорение свободного падения
+     */
+    get g()
+    {
+        return 9.80665;
     }
 
     update() // Обновляем координаты с помощью метода leapfrog
