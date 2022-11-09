@@ -1,5 +1,7 @@
-class Application {
-    constructor() {
+class Application
+{
+    constructor()
+    {
         this.pendulumCanvas = document.getElementById("pendulumCanvas");
         this.pendulumContext = this.pendulumCanvas.getContext("2d");
 
@@ -28,18 +30,14 @@ class Application {
             if (this.run)
                 this.pause();
             else if (this.pendulum !== undefined || this.createPendulum())
-            {
                 this.unpause();
-                this.restartButton.value = "Перезапустить";
-            }
         });
 
         this.restartButton.addEventListener('click', () => {
             if (this.createPendulum())
             {
                 this.cleanCanvas(this.graphCanvas);
-                this.unpause(); // ?
-                this.restartButton.value = "Перезапустить";
+                this.unpause();
             }
         });
     }
@@ -58,17 +56,17 @@ class Application {
         clearInterval(this.timer);
         this.timer = setInterval(() => this.redraw(), this.interval);
         this.continueButton.value = "Остановить";
+        this.restartButton.value = "Запустить";
         this.run = true;
     }
 
     createPendulum()
     {
-        if (!this.validateData())
-            return false;
         const data = this.getData();
+        if (!this.validateData(data))
+            return false;
         this.interval = 30 / data.speed;
-        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, 
-        data.angle, data.length, data.friction, data.ang_vel, data.amplitude, data.mult);
+        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, data);
         return true;
     }
 
@@ -80,7 +78,8 @@ class Application {
     /**
      * Перерисовывает весь холст заново
      */
-    redraw() {
+    redraw()
+    {
         this.pendulum.update();
 
         this.cleanCanvas(this.pendulumCanvas);
@@ -108,7 +107,8 @@ class Application {
      * Возвращает значения
      * @returns {*} null - некорректные данные, значения, если все верно
      */
-    getData() {
+    getData()
+    {
         let values = {}
         for (let field in this.fields)
         {
@@ -122,11 +122,11 @@ class Application {
 
     /**
      * Выводит alert о недопустимых значениях
+     * @param data объект с данными
      * @returns {boolean} true - поля заполнены верно, false - поля заполнены неверно
      */
-    validateData() {
-        const data = this.getData();
-
+    validateData(data)
+    {
         if (data === null) {
             alert("Одно или несколько полей заполнены неправильно или не заполнены совсем!");
             return false;
@@ -169,41 +169,47 @@ class Application {
      * Создаёт маятник
      * @param value состояние полей ввода
      */
-    changeStateInputFields(value) {
+    changeStateInputFields(value)
+    {
         for (let field in this.fields)
             this.fields[field].disabled = value;
     }
 
-    enableInputFields() {
+    enableInputFields()
+    {
         this.changeStateInputFields(false);
     }
 
-    disableInputFields() {
+    disableInputFields()
+    {
         this.changeStateInputFields(true);
     }
 }
 
-class Pendulum {
+class Pendulum
+{
     /**
      * Создаёт маятник
      * @param x0 координата х точки крепления опоры и стержня
      * @param y0 координата y точки крепления опоры и стержня
      * @param radius радиус шара
-     * @param angle угол начального отклонения маятника
-     * @param length длина стержня
-     * @param friction коэффицент затухания
-     * @param ang_vel частота колебаний подвеса
-     * @param amplitude амплитуда колебаний подвеса
-     * @param mult коэффициент отрисовки
+     * @param data.angle угол начального отклонения маятника
+     * @param data.length длина стержня
+     * @param data.friction коэффицент затухания
+     * @param data.ang_vel частота колебаний подвеса
+     * @param data.amplitude амплитуда колебаний подвеса
+     * @param data.mult коэффициент отрисовки
+     * @param data.weight масса шарика
      */
-    constructor(x0, y0, radius, angle, length, friction, ang_vel, amplitude, mult) {
-        // Начальные координаты
+    constructor(x0, y0, radius, data)
+    {
+        // Начальное состояние системы
         this.x0 = x0;
         this.y0 = y0;
 
         // Текущие координаты шара
-        this.ballX = x0 + length * mult * Math.sin(angle);
-        this.ballY = y0 + length * mult * Math.cos(angle);
+        this.ballX = x0 + data.length * data.mult * Math.sin(data.angle);
+        this.ballY = y0 + data.length * data.mult * Math.cos(data.angle);
 
         // Текущие координаты опоры
         this.susX = x0;
@@ -212,95 +218,88 @@ class Pendulum {
         // Радиус шара
         this.r = radius;
 
-        // Масса шарика
-        this.ballMass = 1;
-
         // Параметры системы
 
-        // Отрисовка
-        this.len = length * mult;
-        this.amp = amplitude * mult;
-
         // Истинные значения
-        this.length = length;
-        this.amplitude = amplitude;
+        this.weight = data.weight;
+        this.length = data.length;
+        this.amplitude = data.amplitude;
+        this.friction = data.friction;
+        this.ang_vel = data.ang_vel;
 
-        this.ang_vel = ang_vel;
-        
+        // Отрисовка
+        this.len = data.length * data.mult;
+        this.amp = data.amplitude * data.mult;        
+
         // Координаты для отрисковки графика
         this.coordinates = [];
 
-        this.g = 9.80665;
-        this.friction = friction;
-
-        // Переменные для leap_frog
+        // Переменные для leapfrog
         this.a = [0, 0];
         this.v = [0, 0];
-        this.phi = [angle / 180 * Math.PI, 0];
+        this.phi = [data.angle / 180 * Math.PI, 0];
         this.i = 0;
         this.t = 0;
         this.dt = 0.1;
     }
 
     /**
-     * @return {*} ballX, ballY, susY
+     * Ускорение свободного падения
      */
-    getNewCoordinates() { // Решаем с помощью метода leapfrog уравнение для угла отклонения маятника
+    get g()
+    {
+        return 9.80665;
+    }
+
+    update() // Обновляем координаты с помощью метода leapfrog
+    {
         let i = this.i;
         let x = (this.g / this.len - (this.amp / this.len) * this.ang_vel**2 * Math.cos(this.ang_vel * this.t));
         let y = -2 * this.friction * this.v[i % 2];
 
         this.a[i % 2] = y + x * Math.sin(this.phi[i % 2]);
-
         this.phi[(i + 1) % 2] = this.phi[i % 2] + this.v[i % 2] * this.dt + (1 / 2) * this.a[i % 2] * this.dt**2;
-
         this.a[(i + 1) % 2] = y + x * Math.sin(this.phi[(i + 1) % 2]);
-
         this.v[(i + 1) % 2] = this.v[i % 2] + (1 / 2) * (this.a[i % 2] + this.a[(i + 1) % 2]) * this.dt;
 
-        let susY = this.y0 + this.amp * Math.cos(this.ang_vel * this.t);
-
-        let ballX = this.susX + this.len * Math.sin(this.phi[(i + 1) % 2]);
-        let ballY = this.susY + this.len * Math.cos(this.phi[i % 2]);
+        this.susY = this.y0 + this.amp * Math.cos(this.ang_vel * this.t);
+        this.ballX = this.susX + this.len * Math.sin(this.phi[(i + 1) % 2]);
+        this.ballY = this.susY + this.len * Math.cos(this.phi[i % 2]);
 
         this.t += this.dt;
         this.i = (i + 1) % 2;
-        return {
-            ballX: ballX,
-            ballY: ballY,
-            susY: susY,
-        }
     }
 
     /**
      * Рисует шар
      * @param context контекст
-     * @param canvX ширина полотна
-     * @param canvY высота полотна
+     * @param width ширина полотна
+     * @param height высота полотна
      */
-    drawBall(context, canvX, canvY) {
-        const gradient = context.createRadialGradient(canvX - this.ballX, canvY - this.ballY, this.r,
-             canvX - (this.ballX - 2), canvY - (this.ballY - 4), 2);
+    drawBall(context, width, height)
+    {
+        const gradient = context.createRadialGradient(width - this.ballX, height - this.ballY, this.r, width - (this.ballX - 2), height - (this.ballY - 4), 2);
 
         gradient.addColorStop(0, '#333');
         gradient.addColorStop(1, '#999');
 
         context.fillStyle = gradient;
-        context.arc(canvX - this.ballX, canvY - this.ballY, this.r, 0, Math.PI * 2, true);
+        context.arc(width - this.ballX, height - this.ballY, this.r, 0, Math.PI * 2, true);
         context.fill();
     }
 
     /**
      * Рисует стержень
      * @param context контекст
-     * @param canvX ширина полотна
-     * @param canvY высота полотна
+     * @param width ширина полотна
+     * @param height высота полотна
      */
-    drawKernel(context, canvX, canvY) {
+    drawKernel(context, width, height)
+    {
         context.beginPath();
         context.strokeStyle = "#555";
-        context.moveTo(canvX - this.ballX, canvY - this.ballY);
-        context.lineTo(canvX - this.susX, canvY - this.susY);
+        context.moveTo(width - this.ballX, height - this.ballY);
+        context.lineTo(width - this.susX, height - this.susY);
         context.stroke();
         context.closePath();
     }
@@ -308,51 +307,44 @@ class Pendulum {
     /**
      * Рисует опору
      * @param context контекст
-     * @param canvX ширина полотна
-     * @param canvY высота полотна
+     * @param width ширина полотна
+     * @param height высота полотна
      */
-    drawSuspension(context, canvX, canvY) {
+    drawSuspension(context, width, height)
+    {
         context.beginPath();
         context.strokeStyle = "#555";
-        context.moveTo(canvX - this.susX - 10, canvY - this.susY + 5);
-        context.lineTo(canvX - this.susX + 10, canvY - this.susY + 5);
-        context.lineTo(canvX - this.susX + 10, canvY - this.susY - 5);
-        context.lineTo(canvX - this.susX - 10, canvY - this.susY - 5);
+        context.moveTo(width - this.susX - 10, height - this.susY + 5);
+        context.lineTo(width - this.susX + 10, height - this.susY + 5);
+        context.lineTo(width - this.susX + 10, height - this.susY - 5);
+        context.lineTo(width - this.susX - 10, height - this.susY - 5);
         context.fill();
         context.closePath();
-    }
-
-    update()
-    {
-        const data = this.getNewCoordinates();
-        this.ballX = data.ballX;
-        this.ballY = data.ballY;
-        this.susY = data.susY;
     }
 
     /**
      * Рисует маятник целиком
      * @param context контекст
-     * @param canvX ширина полотна
-     * @param canvY высота полотна
-     * @param clear очистить поло
+     * @param width ширина полотна
+     * @param height высота полотна
      */
-    drawPendulum(context, canvX, canvY) {
-        this.drawKernel(context, canvX, canvY);
-        this.drawSuspension(context, canvX, canvY);
-        this.drawBall(context, canvX, canvY);
+    drawPendulum(context, width, height)
+    {
+        this.drawKernel(context, width, height);
+        this.drawSuspension(context, width, height);
+        this.drawBall(context, width, height);
     }
 
     calculatePotentialEnergy()
     {
-        return this.ballMass * this.g * this.ballY;
+        return this.weight * this.g * this.ballY;
     }
 
     calculateKineticEnergy()
     {
-        let term1 = this.ballMass * this.length**2 * this.calculatePhiDerivative()**2 / 2;
-        let term2 = this.ballMass * this.amplitude * this.length * this.ang_vel * Math.sin(this.ang_vel * this.t) * Math.sin(this.phi[1]); // phi[0]
-        let term3 = this.ballMass * this.amplitude**2 * this.ang_vel**2 * Math.sin(this.ang_vel * this.t) ** 2 / 2;
+        let term1 = this.weight * this.length**2 * this.calculatePhiDerivative()**2 / 2;
+        let term2 = this.weight * this.amplitude * this.length * this.ang_vel * Math.sin(this.ang_vel * this.t) * Math.sin(this.phi[1]); // phi[0]
+        let term3 = this.weight * this.amplitude**2 * this.ang_vel**2 * Math.sin(this.ang_vel * this.t) ** 2 / 2;
         return term1 + term2 + term3;
     }
 
