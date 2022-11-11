@@ -2,6 +2,8 @@ class Application
 {
     constructor()
     {
+        this.FPS = 100
+
         this.pendulumCanvas = document.getElementById("pendulumCanvas");
         this.pendulumContext = this.pendulumCanvas.getContext("2d");
 
@@ -54,7 +56,7 @@ class Application
     {
         this.disableInputFields();
         clearInterval(this.timer);
-        this.timer = setInterval(() => this.redraw(), this.interval);
+        this.timer = setInterval(() => this.redraw(), 1000 / this.FPS);
         this.continueButton.value = "Остановить";
         this.restartButton.value = "Запустить";
         this.run = true;
@@ -65,8 +67,7 @@ class Application
         const data = this.getData();
         if (!this.validateData(data))
             return false;
-        this.interval = 30 / data.speed;
-        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, data);
+        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, data, data.speed / this.FPS);
         return true;
     }
 
@@ -200,8 +201,9 @@ class Pendulum
      * @param data.amplitude амплитуда колебаний подвеса
      * @param data.mult коэффициент отрисовки
      * @param data.weight масса шарика
+     * @param dt длина временного промежутка между кадрами
      */
-    constructor(x0, y0, radius, data)
+    constructor(x0, y0, radius, data, dt)
     {
         // Начальное состояние системы
         this.x0 = x0;
@@ -240,7 +242,7 @@ class Pendulum
         this.phi = [data.angle / 180 * Math.PI, 0];
         this.i = 0;
         this.t = 0;
-        this.dt = 0.1;
+        this.dt = dt;
     }
 
     /**
@@ -375,9 +377,8 @@ class Pendulum
         context.stroke();
         context.closePath();
         
+        // this.drawSerifs(context, width, height);
 
-        // let k = 10;
-        // let x = this.t * k;
         let y = height - this.calculateTotalEnergy() / 50;
         this.coordinates.push(y);
         if (this.coordinates.length > width)
@@ -386,6 +387,15 @@ class Pendulum
             context.fillRect(i, this.coordinates[i], 1, 1);
         context.fill();
     }
+
+    // drawSerifs(context, width, height)
+    // {
+    //     const count = 5;
+    //     const distance = width * this.dt / count;
+    //     const ost = this.t % distance;
+    //     for (let i = 0; i < count; i++)
+    //         context.arc(width * dt - ost - i * distance, height, 2, 0, 2 * Math.PI, false);
+    // }
 }
 
 window.onload = () => {
