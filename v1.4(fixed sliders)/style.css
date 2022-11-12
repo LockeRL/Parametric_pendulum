@@ -1,0 +1,112 @@
+@font-face {
+    font-family: 'Gilroy';
+    src: url('fonts/gilroy-medium-webfont.woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GilroyBold';
+    src: url('fonts/gilroy-semibold-webfont.woff');
+    font-weight: bold;
+    font-style: normal;
+}
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    background: #dae0e0;
+    height: 100vh;
+}
+
+.header {
+    height: 10vh;
+    width: 100%;
+    background: #ffffff;
+}
+
+img {
+    padding-left: 1%;
+    width: auto;
+    height: 95%;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    float: left
+}
+
+#name {
+    font-family: 'GilroyBold';
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 5px;
+    float: left;
+}
+
+#h1 {
+    font-family: 'GilroyBold';
+    text-align: center;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50%;
+    margin: 0 auto;
+}
+
+canvas {
+    margin: 20px;
+    border: 1px solid #999999;
+    float: left;
+}
+
+.info {
+    font-family: 'Gilroy';
+    font-size: x-large;
+    margin-top: 10%;
+    margin-left: 10px;
+    float: left;
+}
+
+.params {
+    margin-top: 5px;
+}
+
+input {
+    font-family: 'Gilroy';
+    font-size: large;
+}
+
+.slider {
+    width: 200px;
+    left: -30px;
+}
+
+output {
+    position: relative;
+    bottom: 5px;
+    padding: 7px 10px;
+    color: white;
+    background: #90b2e8;
+    border-radius: 10px 10px 10px 10px;
+    font-weight: medium;
+    font-size: medium;
+}
+
+select {
+    font-family: 'Gilroy';
+    font-size: large;
+}
+
+.footer {
+    font-style: italic;
+    text-align: right;
+    height: 5%;
+    position: absolute;
+    top: 97%;
+    left: 50%;
+    transform: translateX(-50%);
+}
