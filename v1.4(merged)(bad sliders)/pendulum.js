@@ -2,6 +2,7 @@ class Application
 {
     constructor()
     {
+        // FPS
         this.FPS = 100
 
         this.pendulumCanvas = document.getElementById("pendulumCanvas");
