@@ -234,7 +234,9 @@ class Pendulum
         this.amp = data.amplitude * data.mult;        
 
         // Координаты для отрисковки графика
-        this.coordinates = [];
+        this.energy_values = [];
+        this.min_energy = +Infinity;
+        this.max_energy = -Infinity;
 
         // Переменные для leapfrog
         this.a = [0, 0];
@@ -380,12 +382,24 @@ class Pendulum
         // this.drawSerifs(context, width, height);
 
         let y = height - this.calculateTotalEnergy() / 50;
-        this.coordinates.push(y);
-        if (this.coordinates.length > width)
-            this.coordinates.shift();
-        for (let i = 0; i < this.coordinates.length; i++)
-            context.fillRect(i, this.coordinates[i], 1, 1);
-        context.fill();
+        this.energy_values.push(y);
+        if (this.energy_values.length > width)
+            this.energy_values.shift();
+
+        this.min_energy = Math.min(this.min_energy, ...this.energy_values);
+        this.max_energy = Math.max(this.max_energy, ...this.energy_values);
+        
+        let k = height * 0.1;
+        let coordinates = [];
+        for (let i = 0; i < this.energy_values.length; i++)
+            coordinates.push(normalize_number(this.energy_values[i], this.min_energy, this.max_energy, k, height - k));
+
+        context.beginPath();
+        context.moveTo(0, coordinates[0]);
+        for (let i = 1; i < coordinates.length; i++)
+            context.lineTo(i, coordinates[i]);
+        context.stroke();
+        context.closePath();
     }
 
     // drawSerifs(context, width, height)
@@ -400,4 +414,9 @@ class Pendulum
 
 window.onload = () => {
     new Application();
+}
+
+function normalize_number(number, min_src, max_src, min_dst, max_dst)
+{
+    return min_dst + (number - min_src) / (max_src - min_src) * (max_dst - min_dst);
 }
