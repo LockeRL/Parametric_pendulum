@@ -13,57 +13,62 @@
             <p id="name">МГТУ им. Н.Э. Баумана</p>
             <h1 id="h1">Симуляция движения маятника Капицы</h1>
         </div>
-        <canvas id="pendulumCanvas"></canvas>
-        <canvas id="graphCanvas"></canvas>
-        <div class="info">
-            <p class="params">
-                <label for="ang_vel">Угловая частота: </label>
-                <output for="ang_vel" id="frequency">0</output>
-                <input class="slider" type="range" id="ang_vel" min="0" max="10" value="0" step="0.1" oninput="outputUpdate(value, 'frequency')"> <i>рад/с</i>
-            </p>
+            <canvas id="pendulumCanvas"></canvas>
+            <canvas id="graphCanvas"></canvas>
+            <div class="info">
+                <p class="params">
+                    <label for="ang_vel">Угловая частота: </label>
+                    <input class="slider" type="range" id="a_v" min="0.1" max="10" value="0.1" step="0.1" oninput="outputUpdate(value, 'ang_vel')">
+                    <output for="a_v" id="ang_vel">0.1</output> <i>рад/с</i>
+                </p>
 
-            <p class="params">
-                <label for="amplitude">Амплитуда: </label>
-                <input type="text" id="amplitude" size="3"> <i>м</i>
-            </p>
+                <p class="params">
+                    <label for="amplitude">Амплитуда: </label>
+                    <input class="slider" type="range" id="amp" min="0.1" max="10" value="0.1" step="0.1" oninput="outputUpdate(value, 'amplitude')">
+                    <output for="amp" id="amplitude">0.1</output> <i>м</i>
+                </p>
 
-            <p class="params">
-                <label for="length">Длина подвеса: </label>
-                <input type="text" id="length" size="3"> <i>м</i>
-            </p>
+                <p class="params">
+                    <label for="length">Длина стержня: </label>
+                    <input class="slider" type="range" id="len" min="0.1" max="30" value="0.1" step="0.1" oninput="outputUpdate(value, 'length')">
+                    <output for="len" id="length">0.1</output> <i>м</i>
+                </p>
 
-            <p class="params">
-                <label for="angle">Начальное отклонение: </label>
-                <input type="text" id="angle" size="4"> &deg;
-            </p>
+                <p class="params">
+                    <label for="angle">Начальное отклонение: </label>
+                    <input class="slider" type="range" id="ang" min="-90" max="90" value="0" step="1" oninput="outputUpdate(value, 'angle')">
+                    <output for="ang" id="angle">0</output> &deg;
+                </p>
 
-            <p class="params">
-                <label for="friction">Коэффициент затухания: </label>
-                <input type="text" id="friction" size="4">
-            </p>
+                <p class="params">
+                    <label for="friction">Коэффициент затухания: </label>
+                    <input class="slider" type="range" id="fric" min="0" max="1" value="0" step="0.05" oninput="outputUpdate(value, 'friction')">
+                    <output for="fric" id="friction">0</output>
+                </p>
 
-            <p class="params">
-                <label for="speed">Выберите скорость отрисовки:</label>
-                <select id="speed">
-                    <option value="">--Выберите скорость--</option>
-                    <option value="0.5">0.5x</option>
-                    <option value="1">1x</option>
-                    <option value="2">2x</option>
-                </select>
-            </p>
-            
-            <p class="mTop">
-                <label for="weight">Масса шарика: </label>
-                <input type="text" id="weight" size="1">
-            </p>
+                <p class="params">
+                    <label for="weight">Масса шарика: </label>
+                    <input class="slider" type="range" id="wght" min="0.1" max="5" value="0.1" step="0.1" oninput="outputUpdate(value, 'weight')">
+                    <output for="wght" id="weight">0.1</output>
+                </p>
 
-            <p class="btn">
-                <input type="button" value="Запустить" id="restartButton">
-            </p>
+                <p class="params">
+                    <label for="speed">Выберите скорость отрисовки:</label>
+                    <select id="speed">
+                        <option value="0.5">0.5x</option>
+                        <option value="1" selected="selected">1x</option>
+                        <option value="2">2x</option>
+                    </select>
+                </p>
 
-            <p class="btn">
-                <input type="button" value="Продолжить" id="continueButton">
-            </p>  
+                <p class="btn">
+                    <input type="button" value="Запустить" id="restartButton">
+                </p>
+
+                <p class="btn">
+                    <input type="button" value="Продолжить" id="continueButton">
+                </p>  
+            </div>
         </div>
         <p class="footer">© 2022 Сидоров Максим, Юрченко Михаил, Семенчук Михаил</p>
     </body>
