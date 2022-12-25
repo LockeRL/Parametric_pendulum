@@ -2,6 +2,7 @@ class Application
 {
     constructor()
     {
+        // FPS
         this.FPS = 100
 
         this.pendulumCanvas = document.getElementById("pendulumCanvas");
@@ -20,7 +21,7 @@ class Application
 
 
         this.fields = {}
-        for (let field of ["angle", "ang_vel", "amplitude", "length", "friction", "speed", "weight"])
+        for (let field of ["ang_freq", "amplitude", "length", "init_ang", "friction", "weight", "speed"])
             this.fields[field] = document.getElementById(field);
 
         this.restartButton = document.getElementById("restartButton");
@@ -65,9 +66,9 @@ class Application
     createPendulum()
     {
         const data = this.getData();
-        if (!this.validateData(data))
+        if (!data)
             return false;
-        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, data, data.speed / this.FPS);
+        this.pendulum = new Pendulum(this.pendulumCanvas.width / 2, this.pendulumCanvas.height - data.length * data.mult - 20 - data.amplitude * data.mult, 15, data, this.FPS);
         return true;
     }
 
@@ -113,57 +114,14 @@ class Application
         let values = {}
         for (let field in this.fields)
         {
-            values[field] = parseFloat(this.fields[field].value);
+            let element = document.getElementById(field + "_exp");
+            const degree_of_ten = element ? parseInt(element.value) : 0;
+            values[field] = parseFloat(this.fields[field].value) * 10**degree_of_ten;
             if (!isFinite(values[field]))
                 return null;
         }
         values.mult = this.calcMultByPendulumSize(values.length, values.amplitude);
         return values;
-    }
-
-    /**
-     * Выводит alert о недопустимых значениях
-     * @param data объект с данными
-     * @returns {boolean} true - поля заполнены верно, false - поля заполнены неверно
-     */
-    validateData(data)
-    {
-        if (data === null) {
-            alert("Одно или несколько полей заполнены неправильно или не заполнены совсем!");
-            return false;
-        }
-        
-        if (data.angle < -90 || data.angle > 90) {
-            alert("Начальный угол отклонения должен быть в пределах от -90° до 90°!");
-            return false;
-        }
-
-        if (data.length <= 0) {
-            alert("Длина подвеса должна быть больше 0!");
-            return false;
-        }
-
-        if (data.ang_vel < 0) {
-            alert("Циклическая частота колебаний не может быть меньше 0!");
-            return false;
-        }
-
-        if (data.amplitude < 0) {
-            alert("Амплитуда колебаний подвеса не может быть меньше 0!");
-            return false;
-        }
-
-        if (data.friction < 0 || data.friction > 1) {
-            alert("Коэффициент затухания должен быть от 0 до 1!");
-            return false;
-        }
-
-        if (data.speed <= 0 || data.speed > 3) {
-            alert("Скорость должна быть больше 0 и не больше 3!");
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -194,24 +152,24 @@ class Pendulum
      * @param x0 координата х точки крепления опоры и стержня
      * @param y0 координата y точки крепления опоры и стержня
      * @param radius радиус шара
-     * @param data.angle угол начального отклонения маятника
+     * @param data.init_ang угол начального отклонения маятника
      * @param data.length длина стержня
      * @param data.friction коэффицент затухания
-     * @param data.ang_vel частота колебаний подвеса
+     * @param data.ang_freq частота колебаний подвеса
      * @param data.amplitude амплитуда колебаний подвеса
      * @param data.mult коэффициент отрисовки
      * @param data.weight масса шарика
      * @param dt длина временного промежутка между кадрами
      */
-    constructor(x0, y0, radius, data, dt)
+    constructor(x0, y0, radius, data, fps)
     {
         // Начальное состояние системы
         this.x0 = x0;
         this.y0 = y0;
 
         // Текущие координаты шара
-        this.ballX = x0 + data.length * data.mult * Math.sin(data.angle);
-        this.ballY = y0 + data.length * data.mult * Math.cos(data.angle);
+        this.ballX = x0 + data.length * data.mult * Math.sin(data.init_ang);
+        this.ballY = y0 + data.length * data.mult * Math.cos(data.init_ang);
 
         // Текущие координаты опоры
         this.susX = x0;
@@ -227,22 +185,26 @@ class Pendulum
         this.length = data.length;
         this.amplitude = data.amplitude;
         this.friction = data.friction;
-        this.ang_vel = data.ang_vel;
+        this.ang_freq = data.ang_freq;
 
         // Отрисовка
         this.len = data.length * data.mult;
         this.amp = data.amplitude * data.mult;        
 
         // Координаты для отрисковки графика
-        this.coordinates = [];
+        this.energy_values = [];
+        this.min_energy = +Infinity;
+        this.max_energy = -Infinity;
+
+        this.fps = fps;
 
         // Переменные для leapfrog
         this.a = [0, 0];
         this.v = [0, 0];
-        this.phi = [data.angle / 180 * Math.PI, 0];
+        this.phi = [data.init_ang / 180 * Math.PI, 0];
         this.i = 0;
         this.t = 0;
-        this.dt = dt;
+        this.dt;
     }
 
     /**
@@ -255,8 +217,10 @@ class Pendulum
 
     update() // Обновляем координаты с помощью метода leapfrog
     {
+        this.dt = parseFloat(document.getElementById("speed").value) / this.fps;
+
         let i = this.i;
-        let x = (this.g / this.len - (this.amp / this.len) * this.ang_vel**2 * Math.cos(this.ang_vel * this.t));
+        let x = (this.g / this.len - (this.amp / this.len) * this.ang_freq**2 * Math.cos(this.ang_freq * this.t));
         let y = -2 * this.friction * this.v[i % 2];
 
         this.a[i % 2] = y + x * Math.sin(this.phi[i % 2]);
@@ -264,7 +228,7 @@ class Pendulum
         this.a[(i + 1) % 2] = y + x * Math.sin(this.phi[(i + 1) % 2]);
         this.v[(i + 1) % 2] = this.v[i % 2] + (1 / 2) * (this.a[i % 2] + this.a[(i + 1) % 2]) * this.dt;
 
-        this.susY = this.y0 + this.amp * Math.cos(this.ang_vel * this.t);
+        this.susY = this.y0 + this.amp * Math.cos(this.ang_freq * this.t);
         this.ballX = this.susX + this.len * Math.sin(this.phi[(i + 1) % 2]);
         this.ballY = this.susY + this.len * Math.cos(this.phi[i % 2]);
 
@@ -345,8 +309,8 @@ class Pendulum
     calculateKineticEnergy()
     {
         let term1 = this.weight * this.length**2 * this.calculatePhiDerivative()**2 / 2;
-        let term2 = this.weight * this.amplitude * this.length * this.ang_vel * Math.sin(this.ang_vel * this.t) * Math.sin(this.phi[1]); // phi[0]
-        let term3 = this.weight * this.amplitude**2 * this.ang_vel**2 * Math.sin(this.ang_vel * this.t) ** 2 / 2;
+        let term2 = this.weight * this.amplitude * this.length * this.ang_freq * Math.sin(this.ang_freq * this.t) * Math.sin(this.phi[1]); // phi[0]
+        let term3 = this.weight * this.amplitude**2 * this.ang_freq**2 * Math.sin(this.ang_freq * this.t) ** 2 / 2;
         return term1 + term2 + term3;
     }
 
@@ -376,28 +340,36 @@ class Pendulum
         context.lineTo(width, height);
         context.stroke();
         context.closePath();
-        
-        // this.drawSerifs(context, width, height);
 
         let y = height - this.calculateTotalEnergy() / 50;
-        this.coordinates.push(y);
-        if (this.coordinates.length > width)
-            this.coordinates.shift();
-        for (let i = 0; i < this.coordinates.length; i++)
-            context.fillRect(i, this.coordinates[i], 1, 1);
-        context.fill();
-    }
+        this.energy_values.push(y);
+        if (this.energy_values.length > width)
+            this.energy_values.shift();
 
-    // drawSerifs(context, width, height)
-    // {
-    //     const count = 5;
-    //     const distance = width * this.dt / count;
-    //     const ost = this.t % distance;
-    //     for (let i = 0; i < count; i++)
-    //         context.arc(width * dt - ost - i * distance, height, 2, 0, 2 * Math.PI, false);
-    // }
+        this.min_energy = Math.min(this.min_energy, ...this.energy_values);
+        this.max_energy = Math.max(this.max_energy, ...this.energy_values);
+        
+        let k = height * 0.1;
+
+
+        let coordinates = [];
+        for (let i = 0; i < this.energy_values.length; i++)
+            coordinates.push(normalize_number(this.energy_values[i], this.min_energy, this.max_energy, k, height - k));
+            
+        context.beginPath();
+        context.moveTo(0, coordinates[0]);
+        for (let i = 1; i < coordinates.length; i++)
+            context.lineTo(i, coordinates[i]);
+        context.stroke();
+        context.closePath();
+    }
 }
 
 window.onload = () => {
     new Application();
+}
+
+function normalize_number(number, min_src, max_src, min_dst, max_dst)
+{
+    return min_dst + (number - min_src) / (max_src - min_src) * (max_dst - min_dst);
 }

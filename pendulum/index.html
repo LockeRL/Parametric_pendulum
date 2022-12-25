@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Маятник</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="pendulum.js"></script>
+        <script src="slider.js"></script>
+        <link rel="icon" href="images/Gerb.png">
+    </head>
+    <body>
+        <div class="header">
+            <img src="images/Gerb.png">
+            <p id="name">МГТУ им. Н.Э. Баумана</p>
+            <h1 id="h1">Симуляция движения маятника Капицы</h1>
+        </div>
+        <canvas id="pendulumCanvas"></canvas>
+        <canvas id="graphCanvas"></canvas>
+        <div class="info">
+            <p class="params">
+                <label for="ang_freq">Угловая частота: </label>
+                <input class="slider" type="range" id="a_v" min="1" max="999" value="1" step="1" oninput="outputUpdate(value, 'ang_freq')">
+                <output for="a_v" id="ang_freq">1</output>
+                <select id="ang_freq_exp">
+                    <option value=6>мега Гц</option>
+                    <option value=3>кило Гц</option>
+                    <option value=1 selected="selected">Гц</option>
+                </select>
+            </p>
+
+            <p class="params">
+                <label for="amplitude">Амплитуда: </label>
+                <input class="slider" type="range" id="amp" min="1" max="999" value="1" step="1" oninput="outputUpdate(value, 'amplitude')">
+                <output for="amp" id="amplitude">1</output>
+                <select id="amplitude_exp">
+                    <option value=-2>сантиметр</option>
+                    <option value=-3 selected="selected">миллиметр</option>
+                    <option value=-6>микрометр</option>
+                </select>
+            </p>
+
+            <p class="params">
+                <label for="length">Длина стержня: </label>
+                <input class="slider" type="range" id="len" min="0.1" max="10" value="1" step="0.1" oninput="outputUpdate(value, 'length')">
+                <output for="len" id="length">1</output>
+                <i>метр</i>
+            </p>
+
+            <p class="params">
+                <label for="init_ang">Начальное отклонение: </label>
+                <input class="slider" type="range" id="ang" min="-90" max="90" value="0" step="1" oninput="outputUpdate(value, 'init_ang')">
+                <output for="ang" id="init_ang">0</output>
+                &deg;
+            </p>
+
+            <p class="params">
+                <label for="friction">Коэффициент затухания: </label>
+                <input class="slider" type="range" id="fric" min="0" max="1" value="0" step="0.05" oninput="outputUpdate(value, 'friction')">
+                <output for="fric" id="friction">0</output>
+            </p>
+
+            <p class="params">
+                <label for="weight">Масса шарика: </label>
+                <input class="slider" type="range" id="wght" min="1" max="10" value="1" step="1" oninput="outputUpdate(value, 'weight')">
+                <output for="wght" id="weight">1</output>
+                <i>кг</i>
+            </p>
+
+            <p class="params">
+                <label for="speed">Скорость отрисовки: </label>
+                <input class="slider" type="range" id="spd" min="0.1" max="10" value="1" step="0.1" oninput="outputUpdate(value, 'speed')">
+                <output for="spd" id="speed">1</output>
+            </p>
+
+            <!-- <p class="params">
+                <label for="speed">Масштабирование графика по оси OX: </label>
+                <input class="slider" type="range" id="scl_x" min="0.1" max="10" value="1" step="0.1" oninput="outputUpdate(value, 'scale_x')">
+                <output for="spd" id="scale_x">1</output>
+            </p> -->
+
+            <p class="btn">
+                <input type="button" value="Запустить" id="restartButton">
+            </p>
+
+            <p class="btn">
+                <input type="button" value="Продолжить" id="continueButton">
+            </p>
+        </div>
+        <p class="footer">© 2022 Сидоров Максим, Юрченко Михаил, Семенчук Михаил</p>
+    </body>
+</html>
